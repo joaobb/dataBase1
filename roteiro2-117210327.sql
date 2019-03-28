@@ -74,3 +74,27 @@ CREATE TABLE funcionario(
     nivel CHAR(1),
     superior_cpf CHAR(11) REFERENCES funcionario(cpf)
 );
+
+ALTER TABLE funcionario ADD CONSTRAINT has_sup CHECK ((funcao = 'LIMPEZA' AND superior_cpf IS NOT NULL) OR (funcao = 'SUP_LIMPEZA'));
+
+
+
+INSERT INTO funcionario (cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES ('12345678911', '1980-05-07', 'Pedro da Silva', 'SUP_LIMPEZA', 'S', null);
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES ('12345678912', '1980-03-08', 'Jose da Silva', 'LIMPEZA', 'J', '12345678911');
+
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES ('12345678913', '1980-04-09', 'joao da Silva', 'LIMPEZA', 'J', null);
+--ERROR:  new row for relation "funcionario" violates check constraint "has_sup"
+--DETAIL:  Failing row contains (12345678913, 1980-04-09, joao da Silva, LIMPEZA, J, null).
+
+--questao_9
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('38957494064', '2000-9-18', 'Samuel', 'SUP_LIMPEZA', 'S', NULL);
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('92724485167', '1956-12-2', 'Igor', 'SUP_LIMPEZA', 'J', NULL);
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('92248101412', '1969-12-18', 'Paulo', 'SUP_LIMPEZA', 'J', NULL);
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('58392438031', '1975-11-29', 'Bianca', 'SUP_LIMPEZA', 'P', NULL);
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('48224677798', '1979-4-23', 'Yasmin', 'SUP_LIMPEZA', 'P', NULL);
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('59740984233', '1984-10-13', 'Alice', 'LIMPEZA', 'S', 92248101412);
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('20225191315', '2006-4-13', 'Sarah', 'LIMPEZA', 'S', 92724485167);
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('96078200801', '1951-10-23', 'Marcos', 'LIMPEZA', 'J', 12345678911);
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('24021674430', '1968-2-15', 'Matheus', 'LIMPEZA', 'P', 92724485167);
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('58392434843', '1975-04-10', 'Jorge', 'SUP_LIMPEZA', 'P', NULL);
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('81378200801', '1949-11-10', 'Campelo', 'LIMPEZA', 'S', 58392438031);
