@@ -60,7 +60,8 @@ ALTER TABLE tarefas ADD CONSTRAINT possibleStatus CHECK (status = 'P' OR status 
 UPDATE tarefas SET status = 'P' WHERE status = 'A';
 UPDATE tarefas SET status = 'E' WHERE status = 'R';
 UPDATE tarefas SET status = 'C' WHERE status = 'F';
-
+ALTER TABLE tarefas ADD CONSTRAINT possibleStatus CHECK (status = 'P' OR status = 'E' OR status = 'C');
+            
 --questao_7
 DELETE FROM tarefas WHERE (prioridade > 5 OR prioridade < 0);
 ALTER TABLE tarefas ADD CONSTRAINT priority_limit CHECK(prioridade >= 0 OR prioridade <= 5);
