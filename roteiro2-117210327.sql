@@ -77,7 +77,8 @@ CREATE TABLE funcionario(
 );
 
 ALTER TABLE funcionario ADD CONSTRAINT has_sup CHECK ((funcao = 'LIMPEZA' AND superior_cpf IS NOT NULL) OR (funcao = 'SUP_LIMPEZA'));
-
+ALTER TABLE funcionario ADD CONSTRAINT cpf_size CHECK (LENGTH(cpf) = 11);
+ALTER TABLE funcionario ADD CONSTRAINT invalid_nivel CHECK(nivel = 'J' OR nivel = 'P' OR nivel = 'S');
 
 
 INSERT INTO funcionario (cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES ('12345678911', '1980-05-07', 'Pedro da Silva', 'SUP_LIMPEZA', 'S', null);
@@ -88,14 +89,69 @@ INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUE
 --DETAIL:  Failing row contains (12345678913, 1980-04-09, joao da Silva, LIMPEZA, J, null).
 
 --questao_9
+---10 exemplos corretos
 INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('38957494064', '2000-9-18', 'Samuel', 'SUP_LIMPEZA', 'S', NULL);
 INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('92724485167', '1956-12-2', 'Igor', 'SUP_LIMPEZA', 'J', NULL);
 INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('92248101412', '1969-12-18', 'Paulo', 'SUP_LIMPEZA', 'J', NULL);
 INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('58392438031', '1975-11-29', 'Bianca', 'SUP_LIMPEZA', 'P', NULL);
 INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('48224677798', '1979-4-23', 'Yasmin', 'SUP_LIMPEZA', 'P', NULL);
-INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('59740984233', '1984-10-13', 'Alice', 'LIMPEZA', 'S', 92248101412);
-INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('20225191315', '2006-4-13', 'Sarah', 'LIMPEZA', 'S', 92724485167);
-INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('96078200801', '1951-10-23', 'Marcos', 'LIMPEZA', 'J', 12345678911);
-INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('24021674430', '1968-2-15', 'Matheus', 'LIMPEZA', 'P', 92724485167);
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('59740984233', '1984-10-13', 'Alice', 'LIMPEZA', 'S', '92248101412');
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('20225191315', '2006-4-13', 'Sarah', 'LIMPEZA', 'S', '92724485167');
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('96078200801', '1951-10-23', 'Marcos', 'LIMPEZA', 'J', '12345678911');
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('24021674430', '1968-2-15', 'Matheus', 'LIMPEZA', 'P', '92724485167');
 INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('58392434843', '1975-04-10', 'Jorge', 'SUP_LIMPEZA', 'P', NULL);
-INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('81378200801', '1949-11-10', 'Campelo', 'LIMPEZA', 'S', 58392438031);
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('81378200801', '1949-11-10', 'Campelo', 'LIMPEZA', 'S', '58392438031');
+
+---
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('38957494064', '2000-9-18', 'Rafael', 'LIMPEZA', 'S', NULL);          --Limpeza sem superior
+--ERROR:  new row for relation "funcionario" violates check constraint "has_sup"
+--DETAIL:  Failing row contains (38957494064, 2000-09-18, Rafael, LIMPEZA, S, null).
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('92724485167', '1956-12-2', 'Soraya', 'SUP_LIMPEZA', 'J', NULL);      --CPF repetido
+--ERROR:  duplicate key value violates unique constraint "funcionario_pkey"
+--DETAIL:  Key (cpf)=(92724485167) already exists.
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('922481014129', '1969-12-18', 'Paulo', 'SUP_LIMPEZA', 'J', NULL);     --CPF com mais digitos do que permitido
+--ERROR:  value too long for type character(11)
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('5839243803', '1975-11-29', 'Bianca', 'SUP_LIMPEZA', 'P', NULL);      --CPF com menos digitos do que permitido
+--ERROR:  new row for relation "funcionario" violates check constraint "cpf_size"
+--DETAIL:  Failing row contains (5839243803 , 1975-11-29, Bianca, SUP_LIMPEZA, P, null).
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('59740984243', '1984-10-13', 'Alice', 'LIMPEZA', 'S', 18348132782);   --Superior nao cadastrado no sistema
+--ERROR:  insert or update on table "funcionario" violates foreign key constraint "funcionario_superior_cpf_fkey"
+--DETAIL:  Key (superior_cpf)=(18348132782) is not present in table "funcionario".
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('20225291315', '2006-4-13', 'Sarah', 'LIMPEZA', 'H', 92724485167);    --Nivel fora do padrao
+--ERROR:  new row for relation "funcionario" violates check constraint "invalid_nivel"
+--DETAIL:  Failing row contains (20225291315, 2006-04-13, Sarah, LIMPEZA, H, 92724485167).
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('96078210801', '1951-10-23', 'Marcos', 'LIMPEZA', '', 12345678911);   --Nivel vazio
+--ERROR:  new row for relation "funcionario" violates check constraint "invalid_nivel"
+--DETAIL:  Failing row contains (96078210801, 1951-10-23, Marcos, LIMPEZA,  , 12345678911).
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('24021674430', '1968-2-15', 'Matheus', 'LIMPEZA', 'PP', 92724485167); --Nivel maior do que o permitido
+--ERROR:  value too long for type character(1)
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES(NULL, '1975-04-10', 'Jorge', 'SUP_LIMPEZA', 'P', NULL);               --Chave primaria NULA
+--ERROR:  null value in column "cpf" violates not-null constraint
+--DETAIL:  Failing row contains (null, 1975-04-10, Jorge, SUP_LIMPEZA, P, null).
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES(NULL, NULL, NULL, NULL, NULL, NULL);                                  --Tudo errado
+--ERROR:  null value in column "cpf" violates not-null constraint
+--DETAIL:  Failing row contains (null, null, null, null, null, null).
+
+--questao_10
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('32323232911', '1988-10-12', 'Takeo', 'LIMPEZA', 'P', '58392438031');
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('98765432122', '1996-02-29', 'Otori', 'LIMPEZA', 'S', '92248101412'); --O sql verifica se o ano e bissexto
+INSERT INTO funcionario(cpf, data_nasc, nome, funcao, nivel, superior_cpf) VALUES('98765432111', '1999-05-15', 'Ghanor', 'LIMPEZA', 'J', '38957494064');
+ALTER TABLE tarefas ADD CONSTRAINT func_cpf_fkey FOREIGN KEY (func_resp_cpf) REFERENCES funcionario (cpf) ON DELETE CASCADE;
+
+DELETE FROM funcionario WHERE cpf = '32323232911';
+ALTER TABLE tarefas DROP CONSTRAINT func_cpf_fkey;
+ALTER TABLE tarefas ADD CONSTRAINT func_cpf_restrict_fkey FOREIGN KEY (func_resp_cpf) REFERENCES funcionario (cpf) ON DELETE RESTRICT;
+DELETE FROM funcionario WHERE cpf = '98765432111';
+--ERROR:  update or delete on table "funcionario" violates foreign key constraint "func_cpf_restrict_fkey" on table "tarefas"
+--DETAIL:  Key (cpf)=(98765432111) is still referenced from table "tarefas".
+
+--questao_11
+ALTER TABLE tarefas ADD CONSTRAINT status_validity CHECK((status = 'E' AND func_resp_cpf IS NOT NULL) OR (status = 'P' OR status = 'C'));
+ALTER TABLE tarefas DROP CONSTRAINT func_cpf_restrict_fkey;
+ALTER TABLE tarefas ADD CONSTRAINT func_cpf_fkey_set_null FOREIGN KEY (func_resp_cpf) REFERENCES funcionario (cpf) ON DELETE SET NULL;
+
+INSERT INTO tarefas VALUES (2147483657, 'limpar as lagrimas da sala de prova','81378200801', 5, 'E');
+DELETE FROM funcionario WHERE cpf IN (SELECT func_resp_cpf FROM tarefas WHERE status = 'E');
+--ERROR:  null value in column "func_resp_cpf" violates not-null constraint
+--DETAIL:  Failing row contains (2147483657, limpar as lagrimas da sala de prova, null, 5, E).
+--CONTEXT:  SQL statement "UPDATE ONLY "public"."tarefas" SET "func_resp_cpf" = NULL WHERE $1 OPERATOR(pg_catalog.=) "func_resp_cpf""
