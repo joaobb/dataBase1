@@ -1,0 +1,1 @@
+SELECT dname as department_name FROM department WHERE mgrssn LIKE '%5555';
