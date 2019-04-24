@@ -5,10 +5,11 @@ SELECT COUNT(sex) FROM employee WHERE sex = 'F';
 SELECT AVG(salary) FROM employee WHERE address LIKE '%, TX' AND sex = 'M';
 
 --Q3
-SELECT m.ssn as ssn_supervisor, COUNT(*) AS qtd_supervisionados 
-FROM (employee AS m RIGHT OUTER JOIN employee AS e ON (m.ssn = e.superssn))
-GROUP BY m.ssn
+SELECT e.superssn as ssn_supervisor, COUNT(e.ssn) AS qtd_supervisionados
+FROM employee AS e
+GROUP BY e.superssn
 ORDER BY COUNT(*) ASC;
+
 
 --Q4
 SELECT m.fname as nome_supervisor, COUNT(*) AS qtd_supervisionados 
@@ -60,9 +61,12 @@ FROM project as p JOIN (works_on as w JOIN employee as e ON (w.essn = e.ssn)) ON
 GROUP BY w.pno, p.pname
 ORDER BY AVG(e.salary) ASC;
 
---Q10 NAO FINALIZADO
+--Q10
 SELECT e.fname, e.salary
-FROM works_on as w JOIN employee AS e ON (w.essn = e.ssn AND w.pno = 92);
+FROM employee AS e
+WHERE e.salary > ALL (
+SELECT e.salary
+FROM works_on as w JOIN employee AS e ON (w.essn = e.ssn AND w.pno = 92));
 
 --Q11
 SELECT e.ssn, COUNT(w.pno)
@@ -103,4 +107,24 @@ WHERE fin.ssn = e.ssn;
 
 --Q14
 SELECT d.dname
-FROM (NOT EXISTS (department AND project))
+FROM department as d 
+WHERE NOT EXISTS(
+    SELECT *
+    FROM project as p
+    WHERE p.dnum = d.dnumber
+);
+
+--Q15
+SELECT e.fname, e.lname
+FROM employee AS e
+WHERE NOT EXISTS(
+    (SELECT w.pno
+    FROM works_on as w
+    WHERE w.essn = '123456789')
+
+    EXCEPT
+
+    (SELECT e.ssn, pno
+    FROM works_on, employee as e
+    WHERE e.ssn = essn AND e.ssn != '123456789'));
+    
