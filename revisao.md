@@ -38,7 +38,7 @@
   * Restrições de Chave:
     * Super-key: Conjunto de atributos que identificam uma tupla.
     * Key: Super-key em que a retirada de qualquer atributo, resulta em super-chaves iguais para tuplas diferentes.
-    * - Super-key mínima
+    * Super-key mínima
   * Caso hava várias chaves possíveis, a escolha para a primary key é arbitrária.
 
   * Restrição de Entidade:
